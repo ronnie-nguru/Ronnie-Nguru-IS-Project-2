@@ -2,3 +2,6 @@ venv/
 __pycache__/
 
 config.py
+.env
+data-dev.sqlite
+data.sqlite

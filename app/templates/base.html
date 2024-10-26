@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}BankSphere{% endblock %}</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/custom.css') }}" rel="stylesheet">
+</head>
+
+<body class="bg-gray-100">
+
+    <!-- Navbar -->
+    <nav class="bg-blue-600 text-white">
+        <div class="container mx-auto px-4 py-2 flex justify-between items-center">
+            <h1 class="text-lg font-bold">My Banking App</h1>
+            <div>
+                <a href="{{ url_for('main.home') }}" class="px-4 py-2 hover:bg-blue-500 rounded">Home</a>
+                <a href="{{ url_for('auth.login') }}" class="px-4 py-2 hover:bg-blue-500 rounded">Login</a>
+                <a href="{{ url_for('auth.signup') }}" class="px-4 py-2 hover:bg-blue-500 rounded">Sign Up</a>
+                <a href="{{ url_for('accounts.get_accounts') }}" class="px-4 py-2 hover:bg-blue-500 rounded">Accounts</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Flashed Messages -->
+    <div class="container mx-auto px-4 mt-4">
+        {% with messages = get_flashed_messages(with_categories=True) %}
+        {% if messages %}
+        <div class="space-y-4">
+            {% for category, message in messages %}
+            <div class="p-4 mb-4 text-sm text-white 
+                        {% if category == 'success' %} bg-green-600 
+                        {% elif category == 'danger' %} bg-red-500 
+                        {% elif category == 'info' %} bg-blue-600 
+                        {% elif category == 'warning' %} bg-yellow-600 
+                        {% else %} bg-gray-600 
+                        {% endif %} rounded-lg" role="alert">
+                {{ message }}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        {% endwith %}
+    </div>
+
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 py-6">
+        {% block content %}
+        <!-- Default content goes here -->
+        {% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white py-4">
+        <div class="container mx-auto text-center">
+            <p>&copy; {{ current_year }} BankSphere PLC. All rights reserved.</p>
+        </div>
+    </footer>
+
+</body>
+
+</html>

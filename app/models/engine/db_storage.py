@@ -3,8 +3,11 @@ import os
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, scoped_session
 
-from app.models import User, Transaction, BankAccount
+from app.models.user import User
+from app.models.transaction import Transaction
+from app.models.bank_account import BankAccount
 from app.models.base_model import Base
+from config import config
 
 
 name2class = {
@@ -13,10 +16,7 @@ name2class = {
     'Transaction': Transaction,
 }
 dotenv.load_dotenv()
-db_user = os.getenv('BANK_SPHERE_DBUSER')
-db_name = os.getenv('BANK_SPHERE_DBNAME')
-db_host = os.getenv('BANK_SPHERE_DBHOST')
-db_passwd = os.getenv('BANK_SPHERE_DBPASSWD')
+config_name = os.getenv('BANK_SPHERE_CONFIG') or 'default'
 
 
 class DBStorage:
@@ -25,7 +25,7 @@ class DBStorage:
 
     def __init__(self) -> None:
         self.__engine = create_engine(
-            f'mysql+mysqldb://{db_user}:{db_passwd}@{db_host}/{db_name}',
+            config[config_name].SQLALCHEMY_DATABASE_URI,
             pool_pre_ping=False
         )
 
@@ -87,7 +87,7 @@ class DBStorage:
            type(username) is str and cls in name2class:
             cls = name2class[cls]
             result = self.__session.query(cls).filter(
-                cls.username == username).first()
+                username == username).first()
             return result
         else:
             return None
