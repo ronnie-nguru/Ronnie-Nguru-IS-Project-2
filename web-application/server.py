@@ -3,6 +3,7 @@ import os
 
 from app import create_app, login_manager
 from app.models import storage
+from datetime import datetime
 
 app = create_app(os.environ.get('BANK_SPHERE_CONFIG') or 'default')
 
@@ -19,6 +20,11 @@ def load_user(user_id):
 def teardown_db(exception):
     storage.close()
 
+@app.template_filter('datetime')
+def format_datetime(value):
+    if value:
+        return value.strftime('%Y-%m-%d %H:%M:%S')
+    return ''
 
 if __name__ == '__main__':
     app.run(host=host, port=port)
