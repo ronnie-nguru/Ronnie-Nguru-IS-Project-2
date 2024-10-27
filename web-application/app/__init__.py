@@ -25,4 +25,7 @@ def create_app(config_name):
     from app.routes.accounts import accounts as accounts_blueprint
     app.register_blueprint(accounts_blueprint)
 
+    from app.routes.transactions import transactions as transactions_blueprint
+    app.register_blueprint(transactions_blueprint)
+
     return app

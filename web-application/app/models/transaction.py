@@ -13,6 +13,7 @@ class Transaction(BaseModel, Base):
     transaction_date = Column(DateTime, nullable=False,
                               default=datetime.now().strftime(time_fmt))
     description = Column(String(256))
+    balance_after = Column(Numeric(15, 2))
 
     account_id = Column(Integer, ForeignKey('bank_accounts.id'))
     account = relationship('BankAccount', back_populates='transactions')

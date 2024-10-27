@@ -17,7 +17,7 @@ def login():
         if user and user.verify_password(password):
             login_user(user)
             flash('Login successful!', 'success')
-            return redirect(url_for('main.home'))
+            return redirect(url_for('main.index'))
         flash('Invalid username or password', 'danger')
     return render_template('auth/login.html')
 

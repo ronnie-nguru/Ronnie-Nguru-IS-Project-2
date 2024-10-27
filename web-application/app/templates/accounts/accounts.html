@@ -55,7 +55,7 @@
                     {% for account in accounts %}
                     <tr class="hover:bg-gray-50 transition-colors duration-200">
                         <td class="px-6 py-4 whitespace-nowrap">
-                            <div class="text-sm font-medium text-gray-900">{{ account.accountNumber }}</div>
+                            <div class="text-sm font-medium text-gray-900">{{ account.account_number }}</div>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
                             <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full
@@ -66,7 +66,7 @@
                                 {% else %}
                                     bg-gray-100 text-gray-800
                                 {% endif %}">
-                                {{ account.accountType }}
+                                {{ account.account_type }}
                             </span>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
@@ -89,7 +89,7 @@
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                             <div class="flex justify-end space-x-2">
-                                <a href="{{ url_for('accounts.view_account', account_id=account.id) }}" 
+                                <a href="{{ url_for('accounts.get_account', account_id=account.id) }}" 
                                    class="text-blue-600 hover:text-blue-900">View</a>
                                 <a href="{{ url_for('transactions.new_transaction', account_id=account.id) }}" 
                                    class="text-green-600 hover:text-green-900">Transfer</a>

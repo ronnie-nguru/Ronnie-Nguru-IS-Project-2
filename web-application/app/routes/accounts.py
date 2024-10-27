@@ -16,7 +16,9 @@ def get_accounts():
 @login_required
 def get_account(account_id):
     """Retrieve details of a specific account."""
-    account = storage.get(BankAccount, account_id)
+    print(account_id)
+    account = storage.get_session().query(BankAccount).filter_by(id=account_id).first()
+    print(account)
     return render_template('accounts/account_detail.html', account=account)
 
 @accounts.route('/accounts/new', methods=['GET', 'POST'])
@@ -47,7 +49,7 @@ def edit_account(account_id):
         return redirect(url_for('accounts.get_account', account_id=account.id))
     return render_template('accounts/edit_account.html', account=account)
 
-@accounts.route('/accounts/<int:account_id>/delete', methods=['POST'])
+@accounts.route('/accounts/delete/<int:account_id>', methods=['POST'])
 @login_required
 def delete_account(account_id):
     """Delete a specific bank account."""
