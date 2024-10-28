@@ -13,6 +13,7 @@ class BankAccount(BaseModel, Base):
     account_type = Column(String(20), nullable=False)
     balance = Column(Numeric(15, 2), default=0.00, nullable=False)
     currency = Column(String(3), default='USD', nullable=False)
+    status = Column(String(25), default='active')  # Active, Closed, Frozen
 
     user = relationship('User', back_populates='bank_accounts')
     transactions = relationship('Transaction', back_populates='account')

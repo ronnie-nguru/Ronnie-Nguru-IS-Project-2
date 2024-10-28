@@ -1,7 +1,8 @@
-from flask import Blueprint, request, url_for, flash, redirect, render_template
+from flask import Blueprint, request, url_for, flash, redirect, render_template, current_app, jsonify
 from flask_login import login_required, current_user
 from app.models.bank_account import BankAccount
 from app.models import storage
+from sqlalchemy.exc import SQLAlchemyError
 
 accounts = Blueprint('accounts', __name__)
 
@@ -49,11 +50,56 @@ def edit_account(account_id):
         return redirect(url_for('accounts.get_account', account_id=account.id))
     return render_template('accounts/edit_account.html', account=account)
 
-@accounts.route('/accounts/delete/<int:account_id>', methods=['POST'])
+@accounts.route('/accounts/delete/<int:account_id>', methods=['DELETE'])
 @login_required
 def delete_account(account_id):
     """Delete a specific bank account."""
-    account = storage.get(BankAccount, account_id)
-    account.delete()
-    flash('Account deleted successfully!', 'success')
-    return redirect(url_for('accounts.get_accounts'))
+    try:
+        # Get the account
+        account = storage.get(BankAccount, account_id)
+        
+        # Check if account exists
+        if not account:
+            return jsonify({
+                'success': False,
+                'message': 'Account not found'
+            }), 404
+            
+        # Check if user owns this account
+        if account.user_id != current_user.id:
+            return jsonify({
+                'success': False,
+                'message': 'Unauthorized access'
+            }), 403
+
+        # Check if account has zero balance before deletion
+        if account.balance != 0:
+            return jsonify({
+                'success': False,
+                'message': 'Cannot delete account with non-zero balance'
+            }), 400
+
+        # Perform the deletion
+        account.delete()
+        storage.save()
+
+        return jsonify({
+            'success': True,
+            'message': 'Account deleted successfully!',
+            'account_id': account_id
+        }), 200
+
+    except SQLAlchemyError as e:
+        # Log the error (assuming you have proper logging set up)
+        current_app.logger.error(f"Database error while deleting account {account_id}: {str(e)}")
+        return jsonify({
+            'success': False,
+            'message': 'An error occurred while deleting the account'
+        }), 500
+    
+    except Exception as e:
+        current_app.logger.error(f"Unexpected error while deleting account {account_id}: {str(e)}")
+        return jsonify({
+            'success': False,
+            'message': 'An unexpected error occurred'
+        }), 500

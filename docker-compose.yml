@@ -1,41 +1,11 @@
-version: '3.8'
-
+version: '3'
 services:
-  nginx:
-    build: ./nginx
+  web-application:
+    build: .
     ports:
       - "80:80"
     volumes:
-      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
-      - ./nginx/modsecurity.conf:/etc/nginx/modsecurity/modsecurity.conf
-      - ./nginx/crs-setup.conf:/etc/nginx/modsecurity/crs-setup.conf
-      - ./logs/nginx:/var/log/nginx
-    depends_on:
-      - flask
-    networks:
-      - app-network
-
-  flask:
-    build: ./web-application
-    volumes:
-      - ./web-application:/app
+      - ./web-application:/web-application
     environment:
-      - FLASK_ENV=development
-    networks:
-      - app-network
-
-  graylog:
-    image: graylog/graylog:4.2
-    environment:
-      - GRAYLOG_HTTP_EXTERNAL_URI=http://localhost:9000/
-      - GRAYLOG_ROOT_PASSWORD_SHA2=c0b594560e0042ba216e754fef9247e72464f06e4ca0af7d1c2112dc2401281f  -
-    ports:
-      - "9000:9000"
-    volumes:
-      - ./logs/graylog:/usr/share/graylog/data
-    networks:
-      - app-network
-
-networks:
-  app-network:
-    driver: bridge
+      - FLASK_ENV=production
+      - FLASK_APP=server.py
