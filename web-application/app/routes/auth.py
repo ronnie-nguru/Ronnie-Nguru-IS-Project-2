@@ -13,7 +13,6 @@ def login():
         username = request.form['username']
         password = request.form['password']
         user = storage.get_session().query(User).filter_by(username=username).first()
-        print(user)
         if user and user.verify_password(password):
             login_user(user)
             flash('Login successful!', 'success')
@@ -28,7 +27,7 @@ def logout():
     """Handle user logout."""
     logout_user()
     flash('You have been logged out.', 'info')
-    return redirect(url_for('auth.login'))
+    return redirect(url_for('main.index'))
 
 
 @auth.route('/register', methods=['GET', 'POST'])

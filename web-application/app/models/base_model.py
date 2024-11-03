@@ -30,7 +30,6 @@ class BaseModel:
             if key == '__class__':
                 continue
             setattr(self, key, value)
-            print(f"{self.__class__.__name__}: {key}={value}")
             if type(self.created_at) is str:
                 self.created_at = datetime.strptime(self.created_at, time_fmt)
             if type(self.updated_at) is str:

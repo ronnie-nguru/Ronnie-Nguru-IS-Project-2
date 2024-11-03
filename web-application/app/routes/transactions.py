@@ -1,13 +1,11 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash
 from flask_login import login_required, current_user
 from datetime import datetime
-# Fixed: Import InvalidOperation directly
 from decimal import Decimal, InvalidOperation
 from app.models import storage
 from app.models.bank_account import BankAccount
 from app.models.transaction import Transaction
 
-# Create blueprint
 transactions = Blueprint('transactions', __name__)
 
 
@@ -85,7 +83,7 @@ def new_transaction(account_id):
             flash('Transaction completed successfully.', 'success')
             return redirect(url_for('transactions.account_transactions', account_id=account_id))
 
-        except (ValueError, InvalidOperation):  # Fixed: Use imported InvalidOperation
+        except (ValueError, InvalidOperation):
             flash('Please enter a valid amount.', 'error')
             return redirect(url_for('transactions.new_transaction', account_id=account_id))
         except Exception as e:
@@ -93,7 +91,6 @@ def new_transaction(account_id):
             flash('An error occurred while processing the transaction.', 'error')
             return redirect(url_for('transactions.new_transaction', account_id=account_id))
 
-    # GET request - show transaction form
     return render_template(
         'transactions/new_transaction.html',
         account=account
