@@ -1,97 +1,65 @@
-# Use Ubuntu as base image
-FROM ubuntu:20.04
+FROM nginx:latest
 
-# Prevent interactive prompts during build
-ENV DEBIAN_FRONTEND=noninteractive
+# Install dependencies and required build tools
+RUN apt-get update && \
+    apt-get install -y \
+        libmodsecurity3 libmodsecurity-dev \
+        wget git build-essential \
+        libtool autoconf automake pkg-config \
+        libpcre3 libpcre3-dev \
+        libxml2 libxml2-dev \
+        libcurl4-openssl-dev \
+        uuid-dev zlib1g-dev \
+        cmake && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
 
-# Install dependencies
-RUN apt-get update && apt-get install -y \
-    bison \
-    build-essential \
-    ca-certificates \
-    curl \
-    dh-autoreconf \
-    doxygen \
-    flex \
-    gawk \
-    git \
-    iputils-ping \
-    libcurl4-gnutls-dev \
-    libexpat1-dev \
-    libgeoip-dev \
-    liblmdb-dev \
-    libpcre3-dev \
-    libpcre++-dev \
-    libssl-dev \
-    libtool \
-    libxml2 \
-    libxml2-dev \
-    libyajl-dev \
-    locales \
-    lua5.3-dev \
-    pkg-config \
-    wget \
-    zlib1g-dev \
-    zlibc \
-    libxslt-dev \
-    libgd-dev \
-    nginx \
-    && rm -rf /var/lib/apt/lists/*
-
-# Set working directory
-WORKDIR /opt
+# Clone and build mbedTLS first
+RUN cd /opt && \
+    git clone -b 'mbedtls-2.28.2' --single-branch --depth 1 https://github.com/Mbed-TLS/mbedtls.git && \
+    cd mbedtls && \
+    cmake -DENABLE_TESTING=OFF . && \
+    make && \
+    make install && \
+    cd .. && \
+    rm -rf mbedtls
 
 # Clone and build ModSecurity
-RUN git clone --depth 1 https://github.com/SpiderLabs/ModSecurity && \
+RUN cd /opt && \
+    git clone --depth 1 --branch v3/master https://github.com/SpiderLabs/ModSecurity && \
     cd ModSecurity && \
     git submodule init && \
-    git submodule update && \
+    git submodule update --init --recursive --depth 1 && \
     ./build.sh && \
     ./configure && \
     make && \
-    make install
+    make install && \
+    cd .. && \
+    rm -rf ModSecurity
 
-# Clone ModSecurity-nginx connector
-RUN git clone --depth 1 https://github.com/SpiderLabs/ModSecurity-nginx.git
+# Clone and install NGINX ModSecurity Connector
+RUN cd /opt && \
+    git clone --depth 1 https://github.com/SpiderLabs/ModSecurity-nginx.git
 
-# Get Nginx version and build ModSecurity module
-RUN nginx_version=$(nginx -v 2>&1 | awk -F/ '{print $2}') && \
-    wget http://nginx.org/download/nginx-${nginx_version}.tar.gz && \
-    tar -xvzmf nginx-${nginx_version}.tar.gz && \
-    cd nginx-${nginx_version} && \
-    nginx -V 2>&1 | grep "configure arguments:" | cut -d " " -f2- | xargs ./configure --add-dynamic-module=../ModSecurity-nginx && \
-    make modules
+# Download and compile NGINX with ModSecurity support
+RUN cd /opt && \
+    wget http://nginx.org/download/nginx-1.21.6.tar.gz && \
+    tar zxvf nginx-1.21.6.tar.gz && \
+    cd nginx-1.21.6 && \
+    ./configure --with-compat --add-dynamic-module=/opt/ModSecurity-nginx && \
+    make modules && \
+    cp objs/ngx_http_modsecurity_module.so /etc/nginx/modules && \
+    cd .. && \
+    rm -rf ModSecurity-nginx nginx-1.21.6*
 
-# Create necessary directories
-RUN mkdir -p /etc/nginx/modules /etc/nginx/modsec
-
-# Copy ModSecurity module
-RUN cp /opt/nginx-$(nginx -v 2>&1 | awk -F/ '{print $2}')/objs/ngx_http_modsecurity_module.so /etc/nginx/modules/
-
-# Setup OWASP CRS
-RUN git clone https://github.com/coreruleset/coreruleset /usr/local/modsecurity-crs && \
-    mv /usr/local/modsecurity-crs/crs-setup.conf.example /usr/local/modsecurity-crs/crs-setup.conf && \
-    mv /usr/local/modsecurity-crs/rules/REQUEST-900-EXCLUSION-RULES-BEFORE-CRS.conf.example \
-       /usr/local/modsecurity-crs/rules/REQUEST-900-EXCLUSION-RULES-BEFORE-CRS.conf
-
-# Copy ModSecurity configuration files
-RUN cp /opt/ModSecurity/unicode.mapping /etc/nginx/modsec/ && \
-    cp /opt/ModSecurity/modsecurity.conf-recommended /etc/nginx/modsec/modsecurity.conf
-
-# Create main.conf
-RUN echo "Include /etc/nginx/modsec/modsecurity.conf\n\
-Include /usr/local/modsecurity-crs/crs-setup.conf\n\
-Include /usr/local/modsecurity-crs/rules/*.conf" > /etc/nginx/modsec/main.conf
-
-# Configure ModSecurity
-RUN sed -i 's/SecRuleEngine DetectionOnly/SecRuleEngine On/' /etc/nginx/modsec/modsecurity.conf
-
-# Configure Nginx
+# Copy configuration files
 COPY nginx.conf /etc/nginx/nginx.conf
-COPY default.conf /etc/nginx/conf.d/default.conf
+COPY modsecurity.conf /etc/nginx/modsecurity.conf
 
-# Expose port 80
-EXPOSE 80
+# Enable ModSecurity in NGINX
+RUN echo 'load_module modules/ngx_http_modsecurity_module.so;' > /etc/nginx/modules-enabled/modsecurity.load
 
-# Start Nginx
+# Expose ports
+EXPOSE 80 443
+
 CMD ["nginx", "-g", "daemon off;"]
