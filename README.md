@@ -1,8 +1,4 @@
-Here’s the updated README with references to **bash scripts in the `utility_scripts` folder** instead of Ansible playbooks. These scripts will handle the setup, dependency installation, and status checks for tools and services.
-
----
-
-# Threat Detection and Prevention of SQL Attacks Using Web Application Firewalls and Object-Relational Mappings
+# SQL Injection Detection and Prevention using Web Application Firewalls and Object Relational Mappings
 
 ## Project Overview
 This project focuses on **detecting and preventing SQL injection attacks** in web applications by combining the power of **Web Application Firewalls (WAFs)** and **Object-Relational Mappings (ORM)**. Leveraging **Nginx**, **Gunicorn**, **PostgreSQL**, and **ModSecurity**, we create a robust security layer to safeguard web applications against common SQL injection vulnerabilities. We also utilize **Graylog** for centralized logging and monitoring to detect anomalies and respond to threats in real-time.
