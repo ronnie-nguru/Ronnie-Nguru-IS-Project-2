@@ -47,9 +47,3 @@ def signup():
         return redirect(url_for('auth.login'))
     return render_template('auth/signup.html')
 
-
-@auth.route('/profile')
-@login_required
-def profile():
-    """Render the user profile page."""
-    return render_template('auth/profile.html', user=current_user)
