@@ -17,15 +17,15 @@ def create_app(config_name):
     login_manager.init_app(app)
 
     from app.routes.main import main as main_blueprint
-    app.register_blueprint(main_blueprint)
+    app.register_blueprint(main_blueprint, url_prefix='/app')
 
     from app.routes.auth import auth as auth_blueprint
-    app.register_blueprint(auth_blueprint)
+    app.register_blueprint(auth_blueprint, url_prefix='/app')
 
     from app.routes.accounts import accounts as accounts_blueprint
-    app.register_blueprint(accounts_blueprint)
+    app.register_blueprint(accounts_blueprint, url_prefix='/app')
 
     from app.routes.transactions import transactions as transactions_blueprint
-    app.register_blueprint(transactions_blueprint)
+    app.register_blueprint(transactions_blueprint, url_prefix='/app')
 
     return app
